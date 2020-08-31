@@ -6,11 +6,13 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import com.github.ajalt.timberkt.Timber
 import com.google.android.material.snackbar.Snackbar
 import com.wada811.databinding.dataBinding
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
+import ru.skillbranch.skillarticles.extensions.TimberExtensions.init
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
 import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
@@ -30,6 +32,8 @@ class RootActivity : AppCompatActivity(R.layout.activity_root) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState == null) Timber.init()
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -116,6 +120,7 @@ class RootActivity : AppCompatActivity(R.layout.activity_root) {
         snackbar.show()
     }
 }
+
 
 
 
