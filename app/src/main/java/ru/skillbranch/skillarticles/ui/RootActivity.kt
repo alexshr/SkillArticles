@@ -12,6 +12,8 @@ import com.wada811.databinding.dataBinding
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
+import ru.skillbranch.skillarticles.extensions.Adapters.bindTextSize
+import ru.skillbranch.skillarticles.extensions.Adapters.bindToolbarLogo
 import ru.skillbranch.skillarticles.extensions.TimberExtensions.init
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
@@ -53,6 +55,11 @@ class RootActivity : AppCompatActivity(R.layout.activity_root) {
         }*/
         viewModel.observeNotifications(this) {
             renderNotification(it)
+        }
+
+        viewModel.observeState(this) {
+            bindTextSize(binding.tvTextContent,if (it.isBigText) 18f else 14f)
+            bindToolbarLogo(binding.toolbar,it.categoryIcon)
         }
 
 

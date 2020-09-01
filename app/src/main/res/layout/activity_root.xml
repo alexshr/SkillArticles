@@ -26,7 +26,6 @@
                 style="@style/ArticleToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:logo="@{model.state.categoryIcon}"
                 app:title='@{model.state.title ?? "loading"}'
                 app:subtitle='@{model.state.category ?? "loading"}'
                 app:layout_scrollFlags="scroll|enterAlwaysCollapsed" />
@@ -43,7 +42,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:textSize="@{model.state.bigText? 18f : 14f}"
                 android:text='@{model.state.loadingContent? "loading..." : model.state.content[0]}' />
 
         </androidx.core.widget.NestedScrollView>
