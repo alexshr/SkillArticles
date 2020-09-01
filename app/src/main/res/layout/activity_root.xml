@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:textSize="@{model.state.bigText? 18 : 14}"
+                android:textSize="@{model.state.bigText? 18f : 14f}"
                 android:text='@{model.state.loadingContent? "loading..." : model.state.content[0]}' />
 
         </androidx.core.widget.NestedScrollView>
