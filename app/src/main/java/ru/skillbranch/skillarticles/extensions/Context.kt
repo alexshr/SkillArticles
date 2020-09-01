@@ -124,6 +124,7 @@ object TimberExtensions {
         })
     }
 }
+
 object Adapters {
     @JvmStatic
     @BindingAdapter("android:onClick")
@@ -143,19 +144,16 @@ object Adapters {
 
     }
 
-    @JvmStatic
+    /*@JvmStatic
     @BindingAdapter("app:logo")
     fun bindLogo(toolbar: MaterialToolbar, iconResOld: Any?, iconResNew: Any?) {
-        //d { "iconResOld=$iconResOld, iconResNew=$iconResNew" }
-        if (iconResOld == iconResNew)
-        //d { "new logo is the same" }
-        else {
-            val res = iconResNew ?: R.drawable.logo_placeholder
-            toolbar.logo = ContextCompat.getDrawable(toolbar.context.applicationContext, res as Int)
+        if (iconResOld != iconResNew) {
+            val res: Any? = iconResNew ?: R.drawable.logo_placeholder
+            toolbar.logo = ContextCompat.getDrawable(toolbar.context, res as Int)
             Timber.d { "logo is changed" }
             if (iconResOld == null) toolbar.adjustLogo()
         }
-    }
+    }*/
 
     @JvmStatic
     @BindingAdapter("checked")
@@ -187,6 +185,15 @@ object Adapters {
             view.show(isShow)
             Timber.d { "changed isShow=$isShow" }
         }
+    }
+
+    @JvmStatic
+    @BindingAdapter("app:logo")
+    fun bindToolbarLogo(toolbar: MaterialToolbar, drawableRes: Any?) {
+        val res: Any? = drawableRes ?: R.drawable.logo_placeholder
+        val old=toolbar.logo
+        toolbar.logo = ContextCompat.getDrawable(toolbar.context, res as Int)
+        if(old==null) toolbar.adjustLogo()
     }
 
 }
