@@ -37,16 +37,3 @@ val Context.isNetworkAvailable: Boolean
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
         }
     }
-
-/*
-inline val <reified T> T.TAG: String
-    get() = T::class.java.simpleName+" "+ Thread.currentThread().stackTrace[2].methodName//+" "+Thread.currentThread().stackTrace[2].lineNumber
-
-inline fun <reified T> T.logv(message: String) = Log.v(TAG, message)
-inline fun <reified T> T.logi(message: String) = Log.i(TAG, message)
-inline fun <reified T> T.logw(message: String) = Log.w(TAG, message)
-inline fun <reified T> T.logd(message: String) = Log.d(TAG, message)
-inline fun <reified T> T.loge(message: String) = Log.e(TAG, message)
-inline fun <reified T> T.loge(message: String, err: Throwable) = Log.e(TAG, message,err)
-
-inline fun <reified T> T.logd() = Log.d(TAG, " ")*/

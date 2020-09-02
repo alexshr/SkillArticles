@@ -1,5 +1,7 @@
 package ru.skillbranch.skillarticles.ui.custom.behaviors
 
+import android.content.Context
+import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -31,6 +33,6 @@ class SubmenuBehavior : CoordinatorLayout.Behavior<ArticleSubmenu>() {
     private fun animate(child: ArticleSubmenu, dependency: Bottombar) {
         val fraction = dependency.translationY / dependency.minHeight
         child.translationX = (child.width + child.marginRight) * fraction
-        Log.e("SubmenuBehavior", " fraction : $fraction  translationX: ${child.translationX}")
+        Log.e("SubmenuBehavior", " fraction : $fraction  translationX: ${child.translationX}");
     }
 }
