@@ -51,7 +51,7 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
      * выражение обрабатывающее изменение текущего стостояния
      */
     fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
-        state.observe(owner, Observer { onChanged(it!!) })
+        state.observe(owner, { onChanged(it!!) })
     }
 
     /***
@@ -89,7 +89,7 @@ class ViewModelFactory(private val params: String) : ViewModelProvider.Factory {
 }
 
 class Event<out E>(private val content: E) {
-    var hasBeenHandled = false
+    private var hasBeenHandled = false
 
     /***
      * возвращает контент который еще не был обработан иначе null

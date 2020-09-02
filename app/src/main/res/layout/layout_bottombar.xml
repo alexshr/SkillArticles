@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <data>
-
-        <variable
-            name="model"
-            type="ru.skillbranch.skillarticles.viewmodels.ArticleViewModel" />
-    </data>
-
-    <merge tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
 
         <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
             android:id="@+id/btn_like"
             style="@style/BottombarIcon"
-            android:onClick="@{()->model.handleLike()}"
-            checked="@{model.state.like}"
             android:src="@drawable/like_states"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_bookmark"
@@ -29,8 +19,6 @@
         <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
             android:id="@+id/btn_bookmark"
             style="@style/BottombarIcon"
-            android:onClick="@{()->model.handleBookmark()}"
-            checked="@{model.state.bookmark}"
             android:src="@drawable/bookmark_states"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_share"
@@ -41,22 +29,18 @@
         <ImageView
             android:id="@+id/btn_share"
             style="@style/BottombarIcon"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="@{()->model.handleShare()}"
             android:src="@drawable/ic_share_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_bookmark"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <ru.skillbranch.skillarticles.ui.custom.CheckableImageView
             android:id="@+id/btn_settings"
             style="@style/BottombarIcon"
-            checked="@{model.state.showMenu}"
-            android:onClick="@{()->model.handleToggleMenu()}"
             android:src="@drawable/ic_format_size_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </merge>
-</layout>
+</merge>

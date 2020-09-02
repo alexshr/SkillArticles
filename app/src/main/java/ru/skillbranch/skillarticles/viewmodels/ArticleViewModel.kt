@@ -5,7 +5,6 @@
 package ru.skillbranch.skillarticles.viewmodels
 
 import androidx.lifecycle.LiveData
-import com.github.ajalt.timberkt.Timber.d
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
@@ -15,8 +14,6 @@ import ru.skillbranch.skillarticles.extensions.format
 
 class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
     private val repository = ArticleRepository
-
-    //var isBigText: MutableLiveData<Boolean> = MutableLiveData(false)
 
     init {
         subscribeOnDataSource(getArticleData()){ article, state ->
@@ -78,13 +75,11 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     override fun handleNightMode() {
-        d{" "}
         val settings = currentState.toAppSettings()
         repository.updateSettings(currentState.toAppSettings().copy(isDarkMode = !settings.isDarkMode))
     }
 
     override fun handleLike() {
-        d{" "}
         val toggleLike = {
             val info = currentState.toArticlePersonalInfo()
             repository.updateArticlePersonalInfo(info.copy(isLike = !info.isLike))

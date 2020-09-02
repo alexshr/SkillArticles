@@ -4,22 +4,16 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewAnimationUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.databinding.SubmenuArticleBinding
 import ru.skillbranch.skillarticles.extensions.dpToPx
 import ru.skillbranch.skillarticles.ui.custom.behaviors.SubmenuBehavior
-import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import kotlin.math.hypot
 
 class ArticleSubmenu @JvmOverloads constructor(
@@ -27,34 +21,25 @@ class ArticleSubmenu @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
-
-    private var binding: SubmenuArticleBinding =
-        DataBindingUtil.inflate(
-            LayoutInflater.from(getContext()),
-            R.layout.submenu_article,
-            this,
-            true
-        )
-
     var isOpen = false
     private var centerX: Float = context.dpToPx(200)
     private var centerY: Float = context.dpToPx(96)
 
     init {
-        //View.inflate(context, R.layout.submenu_article, this)
+        View.inflate(context, R.layout.layout_submenu, this)
         //add material bg for handle elevation and color surface
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
     }
 
-    private fun open() {
+    fun open() {
         if (isOpen || !isAttachedToWindow) return
         isOpen = true
         animatedShow()
     }
 
-    private fun close() {
+    fun close() {
         if (!isOpen || !isAttachedToWindow) return
         isOpen = false
         animatedHide()
@@ -131,26 +116,5 @@ class ArticleSubmenu @JvmOverloads constructor(
     override fun getBehavior(): CoordinatorLayout.Behavior<*> {
         return SubmenuBehavior()
     }
-
-    fun setupViewModel(viewModel: ViewModel, lifecycleowner: LifecycleOwner) {
-        binding.apply {
-            model = viewModel as ArticleViewModel?
-            lifecycleOwner = lifecycleowner
-        }
-    }
-
-    fun show(isShow:Boolean){
-        if(isShow) open() else close()
-    }
-
-
-    /*fun renderUI(data: ArticleState) {
-        if (data.isShowMenu) open() else close()
-        binding.apply {
-            switchMode.isChecked = data.isDarkMode
-            btnTextUp.isChecked = data.isBigText
-            btnTextDown.isChecked = !data.isBigText
-        }
-    }*/
 
 }
