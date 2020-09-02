@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -16,7 +15,6 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
@@ -114,7 +112,7 @@ class RootActivity : AppCompatActivity() {
         btn_text_down.setOnClickListener { viewModel.handleDownText() }
         //switch_mode.setOnClickListener { viewModel.handleNightMode() }
         switch_mode.setOnCheckedChangeListener { _, isChecked ->
-            logd("newIsChecked=$isChecked")
+            //logd("newIsChecked=$isChecked")
             //if(viewModel.currentState.isDarkMode!=isChecked)
             delegate.localNightMode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
