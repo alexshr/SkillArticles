@@ -34,8 +34,8 @@
     <style name="ArticleToolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="titleTextColor">?attr/colorOnPrimary</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="android:textColorSecondary">?attr/colorOnPrimary</item>
     </style>
-
 
     <style name="BottombarIcon">
         <item name="android:layout_width">56dp</item>
@@ -45,8 +45,16 @@
         <item name="android:background">@drawable/ripple</item>
     </style>
 
+    <style name="BottombarSearchIcon" parent="BottombarIcon">
+        <item name="android:tint">@color/tint_search_color</item>
+    </style>
+
     <style name="CustomSnackbar" parent="Widget.MaterialComponents.Snackbar">
         <item name="layout_insetEdge">bottom</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

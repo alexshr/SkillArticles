@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package ru.skillbranch.skillarticles.extensions
 
 import android.content.Context
@@ -29,9 +31,8 @@ val Context.isNetworkAvailable: Boolean
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             cm.activeNetwork?.run {
                 val nc = cm.getNetworkCapabilities(this)
-                nc!!.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || nc.hasTransport(
-                    NetworkCapabilities.TRANSPORT_WIFI
-                )
+                nc!!.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
             } ?: false
         } else {
             cm.activeNetworkInfo?.run { isConnectedOrConnecting } ?: false
