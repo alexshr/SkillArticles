@@ -51,7 +51,7 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
      * выражение обрабатывающее изменение текущего стостояния
      */
     fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
-        state.observe(owner, Observer { onChanged(it!!) })
+        state.observe(owner, { onChanged(it!!) })
     }
 
     /***
