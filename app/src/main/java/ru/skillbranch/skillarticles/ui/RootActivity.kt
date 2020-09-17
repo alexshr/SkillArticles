@@ -76,7 +76,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             )
         }
 
-         renderSearchPosition(0)
+        renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
@@ -204,7 +204,14 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
     private fun setupSubmenu() {
         btn_text_up.setOnClickListener { viewModel.handleUpText() }
         btn_text_down.setOnClickListener { viewModel.handleDownText() }
-        switch_mode.setOnClickListener { viewModel.handleNightMode() }
+        //switch_mode.setOnClickListener { viewModel.handleNightMode() }
+        switch_mode.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.handleNightMode()
+            delegate.localNightMode = when {
+                isChecked -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_NO
+            }
+        }
     }
 
     private fun setupBottombar() {
@@ -267,17 +274,18 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             btn_text_down.isChecked = !it
         }
 
-        private var isDarkMode: Boolean by RenderProp(false, needInit = false) {
-            switch_mode.isChecked = it
-            delegate.localNightMode = when {
+        /*private var isDarkMode: Boolean by RenderProp(false, needInit = false) {
+            //switch_mode.isChecked = it
+            *//*delegate.localNightMode = when {
                 it -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_NO
-            }
-        }
+            }*//*
+        }*/
 
         var isSearch: Boolean by ObserveProp(false) {
             if (it) showSearchBar() else hideSearchBar()
         }
+
 
         private var searchResults: List<Pair<Int, Int>> by ObserveProp(emptyList())
 
@@ -321,7 +329,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.content.isNotEmpty()) content = data.content.first() as String
 
             isBigText = data.isBigText
-            isDarkMode = data.isDarkMode
+            //isDarkMode = data.isDarkMode
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
