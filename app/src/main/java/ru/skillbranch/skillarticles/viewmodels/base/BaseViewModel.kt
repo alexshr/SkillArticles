@@ -61,8 +61,7 @@ abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
      * реализует данное поведение с помощью EventObserver
      */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
-        notifications.observe(owner,
-            EventObserver { onNotify(it) })
+        notifications.observe(owner, EventObserver { onNotify(it) })
     }
 
     /***
@@ -87,7 +86,6 @@ abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
     fun restoreState(savedState:Bundle){
         state.value = currentState.restore(savedState) as T
     }
-
 }
 
 class Event<out E>(private val content: E) {
@@ -114,8 +112,6 @@ class Event<out E>(private val content: E) {
 class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Observer<Event<E>> {
 
     override fun onChanged(event: Event<E>?) {
-        //если есть необработанное событие (контент) передай в качестве аргумента в лямбду
-        // onEventUnhandledContent
         event?.getContentIfNotHandled()?.let {
             onEventUnhandledContent(it)
         }

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.method.ScrollingMovementMethod
+import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -17,7 +17,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.text.getSpans
-import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
@@ -25,7 +24,9 @@ import kotlinx.android.synthetic.main.layout_search_view.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.markdown.MarkdownBuilder
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.custom.SearchFocusSpan
@@ -61,9 +62,10 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         setupSubmenu()
     }
 
+    /*alexshr 5
+    добавляем Search Spans к spannedString (там нет markdown символов!!)*/
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
         val content = tv_text_content.text as Spannable
-        tv_text_content.isVisible
 
         clearSearchResult()
 
@@ -75,15 +77,13 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-
-        renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
         val content = tv_text_content.text as Spannable
         val spans = content.getSpans<SearchSpan>()
 
-        content.getSpans<SearchFocusSpan>().forEach {
+            content.getSpans<SearchFocusSpan>().forEach {
             content.removeSpan(it)
         }
 
@@ -142,11 +142,13 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
         searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
+                logd("onQueryTextSubmit query=$query")
                 viewModel.handleSearch(query)
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                logd("onQueryTextChange newText=$newText")
                 viewModel.handleSearch(newText)
                 return true
             }
@@ -204,6 +206,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
     private fun setupSubmenu() {
         btn_text_up.setOnClickListener { viewModel.handleUpText() }
         btn_text_down.setOnClickListener { viewModel.handleDownText() }
+
+        //alexshr ставлю адекватный listener (отличный от примера)
         //switch_mode.setOnClickListener { viewModel.handleNightMode() }
         switch_mode.setOnCheckedChangeListener { _, isChecked ->
             viewModel.handleNightMode()
@@ -222,11 +226,13 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
         btn_result_up.setOnClickListener {
             if (search_view.hasFocus()) search_view.clearFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleUpResult()
         }
 
         btn_result_down.setOnClickListener {
             if (search_view.hasFocus()) search_view.clearFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
             viewModel.handleDownResult()
         }
 
@@ -236,6 +242,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         }
     }
 
+    /*задаются listners для каждого ui свойства (индивидуальные и общий)
+    обновление ui свойств из state */
     inner class ArticleBinding : Binding() {
 
         var isFocusedSearch: Boolean = false
@@ -274,28 +282,36 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             btn_text_down.isChecked = !it
         }
 
-        /*private var isDarkMode: Boolean by RenderProp(false, needInit = false) {
-            //switch_mode.isChecked = it
-            *//*delegate.localNightMode = when {
+        /* alexshr переключение перенесено в listener (не как в примере)
+        private var isDarkMode: Boolean by RenderProp(false, needInit = false) {
+            switch_mode.isChecked = it
+            delegate.localNightMode = when {
                 it -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_NO
-            }*//*
-        }*/
-
+            }
+        }
+*/
         var isSearch: Boolean by ObserveProp(false) {
             if (it) showSearchBar() else hideSearchBar()
         }
-
 
         private var searchResults: List<Pair<Int, Int>> by ObserveProp(emptyList())
 
         private var searchPosition: Int by ObserveProp(0)
 
+        /*alexshr 5
+        перевод данных (string with markdown symbols) в spanned string
+        и ее отображение*/
         private var content: String by ObserveProp("Loading") {
-            tv_text_content.setText(it, TextView.BufferType.SPANNABLE)
-            tv_text_content.movementMethod = ScrollingMovementMethod()
+            MarkdownBuilder(this@RootActivity)
+                .markdownToSpan(it)//перевод markdown string -> spannedString
+                .run {
+                    tv_text_content.setText(this, TextView.BufferType.SPANNABLE)
+                }
+            tv_text_content.movementMethod = LinkMovementMethod.getInstance()
         }
 
+        //инициализация в onCreate
         override fun onFinishInflate() {
             dependsOn<Boolean, Boolean, List<Pair<Int, Int>>, Int>(
                 ::isLoadingContent,
@@ -316,6 +332,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             }
         }
 
+       /* обновление полей и свойств ui, представленных делегатами,
+        благодаря которым при изменении каждого поля запускаются обработчики */
         override fun bind(data: IViewModelState) {
             data as ArticleState
 
@@ -326,10 +344,12 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category
             if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int
-            if (data.content.isNotEmpty()) content = data.content.first() as String
+            if (data.content != null) content = data.content
 
             isBigText = data.isBigText
-            //isDarkMode = data.isDarkMode
+
+           //alexshr отслеживает listener
+           //isDarkMode = data.isDarkMode
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch

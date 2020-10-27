@@ -2,19 +2,23 @@
 
 package ru.skillbranch.skillarticles.extensions
 
+import android.app.Activity
 import android.content.Context
+import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
 import android.util.TypedValue
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import ru.skillbranch.skillarticles.extensions.LogMode.isTest
 
 fun Context.dpToPx(dp: Int): Float {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
         dp.toFloat(),
         this.resources.displayMetrics
-
     )
 }
 
@@ -24,6 +28,20 @@ fun Context.dpToIntPx(dp: Int): Int {
         dp.toFloat(),
         this.resources.displayMetrics
     ).toInt()
+}
+
+fun Context.attrValue(resId: Int): Int {
+    val typedValue = TypedValue()
+    if (theme.resolveAttribute(resId, typedValue, true)) {
+        return typedValue.data
+    } else {
+        throw Resources.NotFoundException("Resource with id $resId not found")
+    }
+}
+
+fun Context.hideKeyboard(view: View) {
+    val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(view.windowToken, 0)
 }
 
 val Context.isNetworkAvailable: Boolean
@@ -40,14 +58,38 @@ val Context.isNetworkAvailable: Boolean
         }
     }
 
+
+//alexshr мое логгирование
 inline val <reified T> T.TAG: String
-    get() = T::class.java.simpleName+" "+ Thread.currentThread().stackTrace[2].methodName//+" "+Thread.currentThread().stackTrace[2].lineNumber
+    get() = T::class.java.simpleName + " " + Thread.currentThread().stackTrace[2].methodName//+" "+Thread.currentThread().stackTrace[2].lineNumber
 
-inline fun <reified T> T.logv(message: String) = Log.v(TAG, message)
-inline fun <reified T> T.logi(message: String) = Log.i(TAG, message)
-inline fun <reified T> T.logw(message: String) = Log.w(TAG, message)
-inline fun <reified T> T.logd(message: String) = Log.d(TAG, message)
-inline fun <reified T> T.loge(message: String) = Log.e(TAG, message)
-inline fun <reified T> T.loge(message: String, err: Throwable) = Log.e(TAG, message,err)
+inline fun <reified T> T.logv(message: String) =
+    if (!isTest) Log.v(TAG, message) else println("$TAG $message")
 
-inline fun <reified T> T.logd() = Log.d(TAG, " ")
+inline fun <reified T> T.logi(message: String) =
+    if (!isTest) Log.i(TAG, message) else println("$TAG $message")
+
+inline fun <reified T> T.logw(message: String) =
+    if (!isTest) Log.w(TAG, message) else println("$TAG $message")
+
+inline fun <reified T> T.logd(message: String) =
+    if (!isTest) Log.d(TAG, message) else println("$TAG $message")
+
+inline fun <reified T> T.loge(message: String) =
+    if (!isTest) Log.e(TAG, message) else println("$TAG $message")
+
+inline fun <reified T> T.loge(message: String, err: Throwable) =
+    if (!isTest) Log.e(TAG, message, err) else {
+        println("$TAG $message")
+        err.printStackTrace()
+    }
+
+inline fun <reified T> T.logd() = logd(" ")
+
+object LogMode {
+    var isTest = false
+}
+
+
+
+

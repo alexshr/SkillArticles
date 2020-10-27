@@ -26,6 +26,7 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
         setupViews()
 
         binding.onFinishInflate()
+        //при изменении state обновляем ui
         viewModel.observeState(this) { binding.bind(it) }
         viewModel.observeNotifications(this) { renderNotification(it) }
     }

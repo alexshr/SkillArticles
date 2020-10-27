@@ -17,8 +17,13 @@ abstract class Binding {
 
     abstract fun restoreUi(savedState: Bundle)
 
-   /* В RenderProp delegate каждого поля добавляется общий для всех полей listener
-     (до этого там уже был свой индивидуальный)*/
+    /* В RenderProp delegate каждого поля добавляется общий для всех полей listener
+      (до этого там уже был свой индивидуальный)
+      ф-я onChange: (A, B, C, D) -> Unit  принимает типы 4-х полей,
+      а сами поля берет из поля delegates (map)
+
+      generic параметры типов переходят в аргументы функции
+      */
     @Suppress("UNCHECKED_CAST")
     fun <A, B, C, D> dependsOn(
         vararg fields: KProperty<*>,
