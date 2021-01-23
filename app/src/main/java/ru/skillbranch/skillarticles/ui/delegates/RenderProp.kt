@@ -5,7 +5,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 /*К полю класса thisRef: Binding данный делегат добавляет функцию onChange (при объявлении данного делегата),
-  автоматически запускаемую при вызове setter поля.
+  автоматически запускаемую при вызове setter и инициализации (если needInit==true)
   Кроме того для делегата можно добавить любое число дополнительных listeners (fun addListener(listener: () -> Unit))
 */
 class RenderProp<T>(
@@ -38,7 +38,7 @@ class RenderProp<T>(
 
 /* Для поля класса thisRef: Binding  создается RenderProp (свойства)
    и кладет ссылку на него в Map (thisRef.delegates[name] = delegate),
-   для того, чтобы впоследствии всем RenderProp полям данного map добавить общий разработчик
+   для того, чтобы впоследствии всем RenderProp полям данного map добавить общий обработчик
  */
 class ObserveProp<T : Any>(
     private var value: T,

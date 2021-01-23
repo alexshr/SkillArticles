@@ -6,11 +6,12 @@ import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
+import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
+import ru.skillbranch.skillarticles.data.repositories.clearContent
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
-import ru.skillbranch.skillarticles.markdown.MarkdownParser
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
@@ -23,6 +24,7 @@ class ArticleViewModel(
     private var clearContent: String? = null
 
     init {
+//        подписка на метаданные из репозитория
         subscribeOnDataSource(getArticleData()) { article, state ->
             article ?: return@subscribeOnDataSource null
             state.copy(
@@ -35,6 +37,9 @@ class ArticleViewModel(
             )
         }
 
+        //подписываем state (ui модель) на изменения репозитории (getArticleContent())
+        //при изменении content (в репозитории) его состояние изменяет поля state (MediatorLiveData)
+        //на который подписаны все view
         subscribeOnDataSource(getArticleContent()) { content, state ->
             content ?: return@subscribeOnDataSource null
             state.copy(
@@ -59,7 +64,9 @@ class ArticleViewModel(
         }
     }
 
-    override fun getArticleContent(): LiveData<String?> {
+    /*возвращаем LiveData<List<MarkdownElement> с обработчиком внутри,
+    который при изменении LiveData (set, post) возвращает актуальный List<MarkdownElement*/
+    override fun getArticleContent(): LiveData<List<MarkdownElement>?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -126,16 +133,15 @@ class ArticleViewModel(
         }
     }
 
-/*alexshr 5
-очищаем строку от markdown символов и ищем в чистом тексте!!
-обновляем состояние*/
     override fun handleSearch(query: String?) {
         query ?: return
 
-        if (clearContent == null) {
-            clearContent = MarkdownParser.clear(currentState.content)
+        //очистка от spans
+        if (clearContent == null && currentState.content.isNotEmpty()) {
+            clearContent = currentState.content.clearContent()
         }
 
+        //поиск в очищенном от spans тексте
         val result = clearContent
             .indexesOf(query)
             .map { it to it + query.length }
@@ -155,6 +161,10 @@ class ArticleViewModel(
         updateState { state ->
             state.copy(searchPosition = state.searchPosition.inc())
         }
+    }
+
+    fun handleCopyCode() {
+        notify(Notify.TextMessage("Code copy to clipboard"))
     }
 }
 
@@ -178,7 +188,7 @@ data class ArticleState(
     val date: String? = null,
     val author: Any? = null,
     val poster: String? = null,
-    val content: String? = null,
+    val content: List<MarkdownElement> = emptyList(),
     val reviews: List<Any> = emptyList()
 ) : IViewModelState {
 

@@ -1,4 +1,4 @@
-//@file:Suppress("DEPRECATION")
+@file:Suppress("DEPRECATION")
 
 package ru.skillbranch.skillarticles.viewmodels.base
 

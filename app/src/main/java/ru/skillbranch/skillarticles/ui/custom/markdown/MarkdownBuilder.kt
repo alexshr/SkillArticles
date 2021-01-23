@@ -1,7 +1,8 @@
-package ru.skillbranch.skillarticles.markdown
+package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.SpannedString
 import android.text.style.StrikethroughSpan
@@ -11,18 +12,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.repositories.Element
+import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToPx
-import ru.skillbranch.skillarticles.extensions.logd
-import ru.skillbranch.skillarticles.markdown.spans.*
+import ru.skillbranch.skillarticles.ui.custom.spans.*
 
 class MarkdownBuilder(context: Context) {
 
     private val colorPrimary: Int = context.attrValue(R.attr.colorPrimary)
-    private val colorSurface: Int = context.attrValue(R.attr.colorSurface)
     private val colorDivider: Int = context.getColor(R.color.color_divider)
     private val colorSecondary: Int = context.attrValue(R.attr.colorSecondary)
     private val colorOnSurface: Int = context.attrValue(R.attr.colorOnSurface)
+    private val opacityColorSurface: Int = context.getColor(R.color.opacity_color_surface)
 
     private val gap: Float = context.dpToPx(8)
     private val ruleWidth: Float = context.dpToPx(2)
@@ -30,33 +32,29 @@ class MarkdownBuilder(context: Context) {
     private val bulletRadius: Float = context.dpToPx(4)
     private val cornerRadius: Float = context.dpToPx(8)
 
-    private val linkIcon = ContextCompat.getDrawable(context, R.drawable.ic_link_black_24dp)!!
+    private val linkIcon: Drawable = ContextCompat.getDrawable(
+        context,
+        R.drawable.ic_link_black_24dp
+    )!!.apply { setTint(colorSecondary) }
 
     private val headerMarginTop: Float = context.dpToPx(12)
     private val headerMarginBottom: Float = context.dpToPx(8)
 
-    // alexshr 5
-    // перевод markdown string -> spannedString
-    fun markdownToSpan(string: String): SpannedString {
-        logd("markdown string:\n$string\n-------------------------------------")
-        val elements = MarkdownParser.parse(string).elements
-        logd("markdown elements:\n$elements\n----------------------------------")
-        val spannedString= buildSpannedString {
-            elements.forEach {
-                buildElement(it, this)
-            }
+    //получение SpannedString для всего текста
+    fun markdownToSpan(textContent: MarkdownElement.Text): SpannedString {
+        return buildSpannedString {
+            textContent.elements.forEach { buildElement(it, this) }
         }
-        logd("spannedString:\n$spannedString\n---------------------------------")
-        return spannedString
     }
-
+    //получение SpannedString для каждого элемента текста (включая вложенные)
     private fun buildElement(element: Element, builder: SpannableStringBuilder): CharSequence {
         return builder.apply {
             when (element) {
                 is Element.Text -> {
-                    append(element.text)
+                    append(element.text)//spans не нужны
                 }
                 is Element.UnorderedListItem -> {
+                    //text полученный в {} оборачиваем в UnorderedListSpan
                     inSpans(UnorderedListSpan(gap, bulletRadius, colorSecondary)) {
                         for (child in element.elements) {
                             buildElement(child, builder)
@@ -113,13 +111,20 @@ class MarkdownBuilder(context: Context) {
                     }
                 }
                 is Element.InlineCode -> {
-                    inSpans(InlineCodeSpan(colorOnSurface, colorSurface, cornerRadius, gap)) {
+                    inSpans(
+                        InlineCodeSpan(
+                            colorOnSurface,
+                            opacityColorSurface,
+                            cornerRadius,
+                            gap
+                        )
+                    ) {
                         append(element.text)
                     }
                 }
                 is Element.Link -> {
                     inSpans(
-                        IconLinkSpan(linkIcon, colorSecondary, gap, colorPrimary, strikeWidth),
+                        IconLinkSpan(linkIcon, gap, colorPrimary, strikeWidth),
                         URLSpan(element.link)
                     ) {
                         append(element.text)
@@ -132,24 +137,9 @@ class MarkdownBuilder(context: Context) {
                         }
                     }
                 }
-                is Element.BlockCode -> {
-                    inSpans(
-                        BlockCodeSpan(
-                            colorOnSurface,
-                            colorSurface,
-                            cornerRadius,
-                            gap,
-                            element.type
-                        )
-                    ) {
-                        append(element.text)
-                    }
-                }
-
-                //comment this because of sealed classes
-                /*else -> {
+                else -> {
                     append(element.text)
-                }*/
+                }
             }
         }
     }

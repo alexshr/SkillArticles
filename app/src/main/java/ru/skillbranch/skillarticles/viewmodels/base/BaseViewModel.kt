@@ -6,69 +6,49 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 
 abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
+
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()
 
-    /***
-     * Инициализация начального состояния аргументом конструктора, и объявления состояния как
-     * MediatorLiveData - медиатор исспользуется для того чтобы учитывать изменяемые данные модели
-     * и обновлять состояние ViewModel исходя из полученных данных
-     */
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
         value = initState
     }
 
-    /***
-     * getter для получения not null значения текущего состояния ViewModel
-     */
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val currentState
         get() = state.value!!
 
-
-    /***
-     * лямбда выражение принимает в качестве аргумента текущее состояние и возвращает
-     * модифицированное состояние, которое присваивается текущему состоянию
-     */
     @UiThread
     protected inline fun updateState(update: (currentState: T) -> T) {
         val updatedState: T = update(currentState)
         state.value = updatedState
     }
 
-    /***
-     * функция для создания уведомления пользователя о событии (событие обрабатывается только один раз)
-     * соответсвенно при изменении конфигурации и пересоздании Activity уведомление не будет вызвано
-     * повторно
-     */
     @UiThread
     protected fun notify(content: Notify) {
         notifications.value = Event(content)
     }
 
-    /***
-     * более компактная форма записи observe() метода LiveData принимает последним аргумент лямбда
-     * выражение обрабатывающее изменение текущего стостояния
-     */
     fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
-        state.observe(owner, Observer { onChanged(it!!) })//если убрать конструктор - валится тест 3-го урока
+        state.observe(owner, Observer { onChanged(it!!) })
     }
 
-    /***
-     * более компактная форма записи observe() метода LiveData вызывает лямбда выражение обработчик
-     * только в том случае если уведомление не было уже обработанно ранее,
-     * реализует данное поведение с помощью EventObserver
-     */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
         notifications.observe(owner, EventObserver { onNotify(it) })
     }
 
-    /***
-     * функция принимает источник данных и лямбда выражение обрабатывающее поступающие данные источника
-     * лямбда принимает новые данные и текущее состояние ViewModel в качестве аргументов,
-     * изменяет его и возвращает модифицированное состояние, которое устанавливается как текущее
-     */
+ /* К общему MediatorLiveData добавляем некоторый source: LiveData<S>
+    При изменении состояния source (set, post) срабатывает обработчик общего MediatorLiveData
+    где уже он сам изменяет состояние state.value = onChanged(it, currentState)
+    onChange возвращает новое значение для state (MediatorLiveData)
+    в onChange передаются некие аргументы (newValue: S, currentState: T)
+    на практике в onChange происходит изменение состояния (currentState) путем присвоения
+    одному из его полей нового текущего значения (newValue) ливдаты source
+
+    Т.е. как только изменяется source его новое значение (например content) обновляет некий общий
+    state (MediatorLiveData) на который подписаны все view
+    */
     protected fun <S> subscribeOnDataSource(
         source: LiveData<S>,
         onChanged: (newValue: S, currentState: T) -> T?
@@ -78,7 +58,7 @@ abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
         }
     }
 
-    fun saveState(outState: Bundle){
+    fun saveState(outState: Bundle) {
         currentState.save(outState)
     }
 
@@ -91,12 +71,9 @@ abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
 class Event<out E>(private val content: E) {
     var hasBeenHandled = false
 
-    /***
-     * возвращает контент который еще не был обработан иначе null
-     */
-    fun getContentIfNotHandled(): E? {
-        return if (hasBeenHandled) null
-        else {
+    fun getContentIfNotHandled(): E? = when {
+        hasBeenHandled -> null
+        else -> {
             hasBeenHandled = true
             content
         }
@@ -118,18 +95,23 @@ class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Obser
     }
 }
 
-sealed class Notify(val message: String) {
-    data class TextMessage(val msg: String) : Notify(msg)
+sealed class Notify {
+
+    abstract val message: String
+
+    data class TextMessage(
+        override val message: String
+    ) : Notify()
 
     data class ActionMessage(
-        val msg: String,
+        override val message: String,
         val actionLabel: String,
         val actionHandler: (() -> Unit)
-    ) : Notify(msg)
+    ) : Notify()
 
     data class ErrorMessage(
-        val msg: String,
+        override val message: String,
         val errLabel: String?,
         val errHandler: (() -> Unit)?
-    ) : Notify(msg)
+    ) : Notify()
 }
