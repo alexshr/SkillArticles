@@ -24,26 +24,10 @@ class IconLinkSpan(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var textWidth = 0f
-
-    private val dashes = DashPathEffect(floatArrayOf(dotWidth, dotWidth), 0f)
+    private val dashs = DashPathEffect(floatArrayOf(dotWidth, dotWidth), 0f)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var path = Path()
-
-    override fun getSize(
-        paint: Paint,
-        text: CharSequence?,
-        start: Int,
-        end: Int,
-        fontMetrics: Paint.FontMetricsInt?
-    ): Int {
-        if (fontMetrics != null) {
-            iconSize = fontMetrics.descent - fontMetrics.ascent
-            linkDrawable.setBounds(0, 0, iconSize, iconSize)
-        }
-        textWidth = paint.measureText(text.toString(), start, end)
-        return (iconSize + padding + textWidth).toInt()
-    }
 
     override fun draw(
         canvas: Canvas,
@@ -57,7 +41,6 @@ class IconLinkSpan(
         paint: Paint
     ) {
         val textStart = x + iconSize + padding
-
         paint.forLine {
             path.reset()
             path.moveTo(textStart, y + paint.descent())
@@ -66,8 +49,8 @@ class IconLinkSpan(
         }
 
         canvas.save()
-        val tY = y + paint.descent() - linkDrawable.bounds.bottom
-        canvas.translate(x + padding / 2f, tY)
+        val trY = y + paint.descent() - linkDrawable.bounds.bottom
+        canvas.translate(x + padding / 2f, trY)
         linkDrawable.draw(canvas)
         canvas.restore()
 
@@ -76,15 +59,32 @@ class IconLinkSpan(
         }
     }
 
+
+    override fun getSize(
+        paint: Paint,
+        text: CharSequence?,
+        start: Int,
+        end: Int,
+        fm: Paint.FontMetricsInt?
+    ): Int {
+        if (fm != null) {
+            iconSize = fm.descent - fm.ascent // fontSize
+            linkDrawable.setBounds(0, 0, iconSize, iconSize)
+        }
+        textWidth = paint.measureText(text.toString(), start, end)
+        return (iconSize + padding + textWidth).toInt()
+    }
+
+
     private inline fun Paint.forLine(block: () -> Unit) {
         val oldColor = color
         val oldStyle = style
         val oldWidth = strokeWidth
 
-        pathEffect = dashes
         color = textColor
         style = Paint.Style.STROKE
         strokeWidth = 0f
+        pathEffect = dashs
 
         block()
 

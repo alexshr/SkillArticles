@@ -26,28 +26,41 @@ class MarkdownTextView constructor(
 
     constructor(context: Context, fontSize: Float) : this(context, fontSize, null)
 
-    private val color: Int = context.attrValue(R.attr.colorOnBackground)
-    private val focusRect = Rect()
-
-    private val searchBgHelper: SearchBgHelper//для отрисовки фона
-
     override var fontSize: Float = fontSize
         set(value) {
             textSize = value
             field = value
         }
-
     override val spannableContent: Spannable
         get() = text as Spannable
 
+    private val color = context.attrValue(R.attr.colorOnBackground)
+    private val focusRect = Rect()
+
+    private var searchBgHelper = SearchBgHelper(context) { top, bottom ->
+        focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
+        //show rect on view with animation
+        requestRectangleOnScreen(focusRect, false)
+    }
+
     init {
         searchBgHelper = mockHelper ?: SearchBgHelper(context) { top, bottom ->
-            focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))//чтобы фокус поиска не прижимался к краю экрана
-            requestRectangleOnScreen(focusRect, false)  //view скроллится (false - с анимацией, не мгновенно) так чтобы rect (фокус поиска) оставался видимым
+            //чтобы фокус поиска не прижимался к краю экрана
+            focusRect.set(
+                0,
+                top - context.dpToIntPx(56),
+                width,
+                bottom + context.dpToIntPx(56)
+            )
+            //view скроллится (false - с анимацией, не мгновенно) так чтобы rect (фокус поиска) оставался видимым
+            requestRectangleOnScreen(
+                focusRect,
+                false
+            )
         }
         setTextColor(color)
         textSize = fontSize
-            movementMethod = LinkMovementMethod.getInstance()//прокрутка и кликабельность ссылок
+        movementMethod = LinkMovementMethod.getInstance()//прокрутка и кликабельность ссылок
     }
 
     override fun onDraw(canvas: Canvas) {

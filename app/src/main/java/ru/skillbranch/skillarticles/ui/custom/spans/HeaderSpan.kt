@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.text.Layout
 import android.text.Spanned
@@ -14,6 +13,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 
+
 class HeaderSpan constructor(
     @IntRange(from = 1, to = 6)
     private val level: Int,
@@ -25,11 +25,11 @@ class HeaderSpan constructor(
     private val marginTop: Float,
     @Px
     private val marginBottom: Float
-) : MetricAffectingSpan(), LineHeightSpan, LeadingMarginSpan {
+) :
+    MetricAffectingSpan(), LineHeightSpan, LeadingMarginSpan {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val linePadding = 0.4f
-
     private var originAscent = 0
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -44,7 +44,6 @@ class HeaderSpan constructor(
 
     var topExtraPadding = 0
     var bottomExtraPadding = 0
-
     lateinit var firstLineBounds: kotlin.ranges.IntRange
     lateinit var lastLineBounds: kotlin.ranges.IntRange
 
@@ -71,15 +70,13 @@ class HeaderSpan constructor(
             fm.ascent = originAscent
         }
 
-        // line break +1 character
         if (spanEnd == end.dec()) {
-            val originDescent = fm.descent
             val originHeight = fm.descent - originAscent
+            val originDescent = fm.descent
             fm.descent = (originHeight * linePadding + marginBottom).toInt()
             bottomExtraPadding = fm.descent - originDescent
             lastLineBounds = start..end.dec()
         }
-
         fm.top = fm.ascent
         fm.bottom = fm.descent
     }
@@ -104,12 +101,11 @@ class HeaderSpan constructor(
         lineTop: Int, lineBaseline: Int, lineBottom: Int, text: CharSequence?, lineStart: Int,
         lineEnd: Int, isFirstLine: Boolean, layout: Layout?
     ) {
-
-        // for 1 or 2 level and last line
         if ((level == 1 || level == 2) && (text as Spanned).getSpanEnd(this) == lineEnd) {
             paint.forLine {
-                val lineHeight = (paint.descent() - paint.ascent()) * sizes.getOrElse(level) { 1f }
-                val lineOffset = lineBaseline + lineHeight * linePadding
+                val lh = paint.descent() - paint.ascent() * sizes.getOrElse(level) { 1f }
+                val lineOffset = lineBaseline + lh * linePadding
+
                 canvas.drawLine(
                     0f,
                     lineOffset,
@@ -119,7 +115,6 @@ class HeaderSpan constructor(
                 )
             }
         }
-        // canvas.drawFontLines(lineTop, lineBottom, lineBaseline, paint)
     }
 
     override fun getLeadingMargin(first: Boolean): Int {
@@ -140,55 +135,5 @@ class HeaderSpan constructor(
         color = oldColor
         style = oldStyle
         strokeWidth = oldWidth
-    }
-
-    private fun Canvas.drawFontLines(
-        top: Int,
-        bottom: Int,
-        lineBaseline: Int,
-        paint: Paint
-    ) {
-        // top font line
-        drawLine(0f,
-            top + 0f,
-            width + 0f,
-            top + 0f,
-            Paint().apply { color = Color.BLUE }
-        )
-
-        // bottom font line
-        drawLine(0f,
-            bottom + 0f,
-            width + 0f,
-            bottom + 0f,
-            Paint().apply { color = Color.GREEN }
-        )
-
-        // baseline
-        drawLine(
-            0f,
-            lineBaseline + 0f,
-            width + 0f,
-            lineBaseline + 0f,
-            Paint().apply { color = Color.RED }
-        )
-
-        // ascent
-        drawLine(
-            0f,
-            paint.ascent() + lineBaseline + 0f,
-            width + 0f,
-            paint.ascent() + lineBaseline + 0f,
-            Paint().apply { color = Color.CYAN }
-        )
-
-        // descent
-        drawLine(
-            0f,
-            paint.descent() + lineBaseline + 0f,
-            width + 0f,
-            paint.descent() + lineBaseline + 0f,
-            Paint().apply { color = Color.MAGENTA }
-        )
     }
 }

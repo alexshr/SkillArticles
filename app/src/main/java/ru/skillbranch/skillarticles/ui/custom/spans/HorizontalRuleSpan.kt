@@ -18,7 +18,7 @@ class HorizontalRuleSpan(
         text: CharSequence?,
         start: Int,
         end: Int,
-        fontMetrics: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?
     ): Int {
         return 0
     }

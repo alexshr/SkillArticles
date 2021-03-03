@@ -4,23 +4,22 @@ import android.os.Parcelable
 import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
+import androidx.core.view.*
 
 fun View.setMarginOptionally(
-    left: Int? = null, top: Int? = null,
-    right: Int? = null, bottom: Int? = null
+    left: Int = marginLeft,
+    top: Int = marginTop,
+    right: Int = marginRight,
+    bottom: Int = marginBottom
 ) {
-    layoutParams<ViewGroup.MarginLayoutParams> {
-        left?.let { leftMargin = it }
-        top?.let { topMargin = it }
-        right?.let { rightMargin = it }
-        bottom?.let { bottomMargin = it }
-    }
+    (this.layoutParams as ViewGroup.MarginLayoutParams).setMargins(left, top, right, bottom)
 }
 
 fun View.setPaddingOptionally(
-    left: Int = paddingLeft, top: Int = paddingTop,
-    right: Int = paddingRight, bottom: Int = paddingBottom
+    left: Int = paddingLeft,
+    top: Int = paddingTop,
+    right: Int = paddingRight,
+    bottom: Int = paddingBottom
 ) {
     setPadding(left, top, right, bottom)
 }

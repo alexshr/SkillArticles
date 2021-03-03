@@ -19,7 +19,6 @@ class InlineCodeSpan(
     @Px
     private val padding: Float
 ) : ReplacementSpan() {
-
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var rect: RectF = RectF()
 
@@ -64,8 +63,8 @@ class InlineCodeSpan(
     private inline fun Paint.forText(block: () -> Unit) {
         val oldSize = textSize
         val oldStyle = typeface?.style ?: 0
-        val oldFont = typeface
         val oldColor = color
+        val oldFont = typeface
 
         color = textColor
         typeface = Typeface.create(Typeface.MONOSPACE, oldStyle)
@@ -84,6 +83,7 @@ class InlineCodeSpan(
 
         color = bgColor
         style = Paint.Style.FILL
+        strokeWidth = 0f
 
         block()
 

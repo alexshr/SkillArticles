@@ -1,11 +1,11 @@
 package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import ru.skillbranch.skillarticles.data.*
 
 object ArticleRepository {
-
     private val local = LocalDataHolder
     private val network = NetworkDataHolder
 
@@ -19,17 +19,14 @@ object ArticleRepository {
     }
 
     fun getArticle(articleId: String): LiveData<ArticleData?> {
-        return local.findArticle(articleId)
+        return local.findArticle(articleId) //2s delay from db
     }
 
     fun loadArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        return local.findArticlePersonalInfo(articleId)
+        return local.findArticlePersonalInfo(articleId) //1s delay from db
     }
 
-    fun getAppSettings(): LiveData<AppSettings> {
-        return local.getAppSettings()
-    }
-
+    fun getAppSettings(): LiveData<AppSettings> = local.getAppSettings() //from preferences
     fun updateSettings(appSettings: AppSettings) {
         local.updateAppSettings(appSettings)
     }
@@ -37,4 +34,6 @@ object ArticleRepository {
     fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
         local.updateArticlePersonalInfo(info)
     }
+
+    fun isAuth(): MutableLiveData<Boolean> = local.isAuth()
 }

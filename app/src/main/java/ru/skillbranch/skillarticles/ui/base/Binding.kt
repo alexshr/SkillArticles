@@ -6,17 +6,38 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import kotlin.reflect.KProperty
 
 abstract class Binding {
-
     val delegates = mutableMapOf<String, RenderProp<out Any>>()
+    var isInflated = false
 
-    abstract fun onFinishInflate()
+    open val afterInflated: (() -> Unit)? = null
+    fun onFinishInflate() {
+        if (!isInflated) {
+            afterInflated?.invoke()
+            isInflated = true
+        }
+    }
+
+    fun rebind() {
+        delegates.forEach { it.value.bind() }
+    }
 
     abstract fun bind(data: IViewModelState)
 
-    abstract fun saveUi(outState: Bundle)
+    /**
+     * override this if need save binding in bundle
+     */
+    open fun saveUi(outState: Bundle) {
+        //empty default implementation
+    }
 
-    abstract fun restoreUi(savedState: Bundle)
+    /**
+     * override this if need restore binding from bundle
+     */
+    open fun restoreUi(savedState: Bundle?) {
+        //empty default implementation
+    }
 
+    //Добавление общего listner для каждого делегата
     @Suppress("UNCHECKED_CAST")
     fun <A, B, C, D> dependsOn(
         vararg fields: KProperty<*>,
@@ -25,8 +46,8 @@ abstract class Binding {
         check(fields.size == 4) { "Names size must be 4, current ${fields.size}" }
         val names = fields.map { it.name }
 
-        names.forEach { name ->
-            delegates[name]?.addListener {
+        names.forEach {
+            delegates[it]?.addListener {
                 onChange(
                     delegates[names[0]]?.value as A,
                     delegates[names[1]]?.value as B,

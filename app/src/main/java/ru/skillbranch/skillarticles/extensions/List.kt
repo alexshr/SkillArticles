@@ -5,15 +5,13 @@ package ru.skillbranch.skillarticles.extensions
 нам нужно разбить (сгруппировать) этот результат по имеющимся текстовым элементам (bounds: List<Pair<Int, Int>>)
 получаем в итоге список результатов поиска List<List<Pair<Int, Int>>>
 */
-fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<List<Pair<Int, Int>>> {
-    val result = mutableListOf<List<Pair<Int, Int>>>()
-    bounds.forEach { (lBound, rBound) ->
-        run {
-            val insideBounds = filter { (_lBound: Int, _rBound: Int) ->
-                _lBound >= lBound && _rBound <= rBound
-            }
-            result.add(insideBounds)
+fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>) : List<List<Pair<Int, Int>>> {
+    val resultList = mutableListOf<List<Pair<Int, Int>>>()
+    bounds.forEach {(leftBound, rightBound) ->
+        val inBounds = this.filter { (lb, rb) ->
+            lb >= leftBound && rb <= rightBound
         }
+        resultList.add(inBounds)
     }
-    return result
+    return resultList
 }

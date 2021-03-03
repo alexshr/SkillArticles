@@ -13,27 +13,33 @@ interface IMarkdownView {
     val spannableContent: Spannable
 
     //выделяем результаты поиска
-    fun renderSearchResult(results: List<Pair<Int, Int>>, offset: Int) {
+    fun renderSearchResult(
+        results: List<Pair<Int, Int>>,
+        offset: Int
+    ) {
         clearSearchResult()
+        val offsetResult = results
+            .map { (start, end) -> start.minus(offset) to end.minus(offset) }
 
-        val offsetResult = results.map { (start, end) ->
-            start.minus(offset) to end.minus(offset)
-        }
+        try {
+            offsetResult.forEach { (start, end) ->
+                spannableContent.setSpan(
+                    SearchSpan(),
+                    start,
+                    end,
+                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        } catch (e: Exception) {
 
-        offsetResult.forEach { (start, end) ->
-            spannableContent.setSpan(
-                SearchSpan(),
-                start,
-                end,
-                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
         }
     }
 
-    fun renderSearchPosition(searchPosition: Pair<Int, Int>, offset: Int) {
-        spannableContent
-            .getSpans<SearchFocusSpan>()
-            .forEach { spannableContent.removeSpan(it) }
+    fun renderSearchPosition(
+        searchPosition: Pair<Int, Int>,
+        offset: Int
+    ) {
+        spannableContent.getSpans<SearchFocusSpan>().forEach { spannableContent.removeSpan(it) }
         spannableContent.setSpan(
             SearchFocusSpan(),
             searchPosition.first.minus(offset),
@@ -43,8 +49,6 @@ interface IMarkdownView {
     }
 
     fun clearSearchResult() {
-        spannableContent
-            .getSpans<SearchSpan>()
-            .forEach { spannableContent.removeSpan(it) }
+        spannableContent.getSpans<SearchSpan>().forEach { spannableContent.removeSpan(it) }
     }
 }

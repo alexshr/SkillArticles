@@ -30,22 +30,31 @@ class MarkdownCodeView private constructor(
     context: Context,
     fontSize: Float
 ) : ViewGroup(context, null, 0), IMarkdownView {
+    override var fontSize: Float = fontSize
+        set(value) {
+            tv_codeView.textSize = value * 0.85f
+            field = value
+        }
+
+    override val spannableContent: Spannable
+        get() = tv_codeView.text as Spannable
 
     var copyListener: ((String) -> Unit)? = null
 
     private lateinit var codeString: CharSequence
 
+    //views
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val iv_copy: ImageView
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val iv_switch: ImageView
+    private val tv_codeView: MarkdownTextView
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val sv_scroll: HorizontalScrollView
 
-    private val tv_codeView: MarkdownTextView
-
+    //colors
     @ColorInt
     private val darkSurface: Int = context.attrValue(R.attr.darkSurfaceColor)
 
@@ -58,43 +67,35 @@ class MarkdownCodeView private constructor(
     @ColorInt
     private val lightOnSurface: Int = context.attrValue(R.attr.lightOnSurfaceColor)
 
-    private val radius: Float = context.dpToPx(8)
-    private val padding: Int = context.dpToIntPx(8)
-    private val iconSize: Int = context.dpToIntPx(12)
-    private val fadingOffset: Int = context.dpToIntPx(144)
-    private val scrollBarHeight: Int = context.dpToIntPx(2)
-    private val textExtraPadding: Int = context.dpToIntPx(80)
+    //sizes
+    private val iconSize = context.dpToIntPx(12)
+    private val radius = context.dpToPx(8)
+    private val padding = context.dpToIntPx(8)
+    private val fadingOffset = context.dpToIntPx(144)
+    private val textExtraPadding = context.dpToIntPx(80)
+    private val scrollBarHeight = context.dpToIntPx(2)
 
-    private var isSingleLine: Boolean = false
+    //for layout
+    private var isSingleLine = false
+    private var isDark = false
 
     /*состояние до изменения темы пользователя.
     в данном случае цвета этой темы дублируют light тему
     необходимость этого отдельного состояния сомнительна*/
-    private var isManual: Boolean = false
-    private var isDark: Boolean = false
-
-    private val bgColor: Int
+    private var isManual = false
+    private val bgColor
         get() = when {
             !isManual -> context.attrValue(R.attr.colorSurface)
             isDark -> darkSurface
             else -> lightSurface
         }
 
-    private val textColor: Int
+    private val textColor
         get() = when {
             !isManual -> context.attrValue(R.attr.colorOnSurface)
             isDark -> darkOnSurface
             else -> lightOnSurface
         }
-
-    override var fontSize: Float = fontSize
-        set(value) {
-            tv_codeView.textSize = value * 0.85f
-            field = value
-        }
-
-    override val spannableContent: Spannable
-        get() = tv_codeView.text as Spannable
 
     init {
         tv_codeView = MarkdownTextView(context, fontSize * 0.85f).apply {
@@ -114,16 +115,15 @@ class MarkdownCodeView private constructor(
             isHorizontalFadingEdgeEnabled = true
             scrollBarSize = scrollBarHeight
             setFadingEdgeLength(fadingOffset)
-            addView(tv_codeView) // add code text to scroll
+            addView(tv_codeView)
         }
+
         addView(sv_scroll)
 
         iv_copy = ImageView(context).apply {
             setImageResource(R.drawable.ic_content_copy_black_24dp)
             imageTintList = ColorStateList.valueOf(textColor)
-            setOnClickListener {
-                copyListener?.invoke(codeString.toString())
-            }
+            setOnClickListener { copyListener?.invoke(codeString.toString()) }
         }
         addView(iv_copy)
 
@@ -135,17 +135,18 @@ class MarkdownCodeView private constructor(
         addView(iv_switch)
     }
 
+
     constructor(
         context: Context,
         fontSize: Float,
         code: CharSequence
     ) : this(context, fontSize) {
+
         codeString = code
         isSingleLine = code.lines().size == 1
 
         tv_codeView.setText(codeString, TextView.BufferType.SPANNABLE)
         setPadding(padding)
-
         background = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = FloatArray(8).apply { fill(radius, 0, size) }
@@ -156,9 +157,10 @@ class MarkdownCodeView private constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = 0
-        val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
+        val width = getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
         measureChild(sv_scroll, widthMeasureSpec, heightMeasureSpec)
-        //измерили child, чтобы вычислить usedHeight
+        measureChild(iv_copy, widthMeasureSpec, heightMeasureSpec)
+
         usedHeight += sv_scroll.measuredHeight + paddingTop + paddingBottom
         setMeasuredDimension(width, usedHeight)
     }
@@ -172,12 +174,14 @@ class MarkdownCodeView private constructor(
 
         if (isSingleLine) {
             val iconHeight = (b - t - iconSize) / 2
+
             iv_copy.layout(
                 right - iconSize,
                 iconHeight,
                 right,
                 iconHeight + iconSize
             )
+
             iv_switch.layout(
                 iv_copy.right - (2.5f * iconSize).toInt(),
                 iconHeight,
@@ -191,6 +195,7 @@ class MarkdownCodeView private constructor(
                 right,
                 usedHeight + iconSize
             )
+
             iv_switch.layout(
                 iv_copy.right - (2.5f * iconSize).toInt(),
                 usedHeight,
@@ -198,6 +203,7 @@ class MarkdownCodeView private constructor(
                 usedHeight + iconSize
             )
         }
+
         sv_scroll.layout(
             left,
             usedHeight,
@@ -208,9 +214,7 @@ class MarkdownCodeView private constructor(
 
     override fun renderSearchPosition(searchPosition: Pair<Int, Int>, offset: Int) {
         super.renderSearchPosition(searchPosition, offset)
-        if ((parent as ViewGroup).hasFocus() && !tv_codeView.hasFocus()) {
-            tv_codeView.requestFocus()
-        }
+        if ((parent as ViewGroup).hasFocus() && !tv_codeView.hasFocus()) tv_codeView.requestFocus()
         Selection.setSelection(spannableContent, searchPosition.first.minus(offset))
     }
 
@@ -228,10 +232,10 @@ class MarkdownCodeView private constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        val savedState = SavedState(super.onSaveInstanceState())
-        savedState.ssIsDark = isDark
-        savedState.ssIsManual = isManual
-        return savedState
+        val mySavedState = SavedState(super.onSaveInstanceState())
+        mySavedState.ssIsDark = isDark
+        mySavedState.ssIsManual = isManual
+        return mySavedState
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -241,15 +245,6 @@ class MarkdownCodeView private constructor(
             applyColors()
         }
         super.onRestoreInstanceState(state)
-    }
-
-    override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>) {
-        //запрещаем childs сохранять состояние - обрабатываем все сами
-        dispatchFreezeSelfOnly(container)
-    }
-
-    override fun dispatchRestoreInstanceState(container: SparseArray<Parcelable>) {
-        dispatchThawSelfOnly(container)
     }
 
     private class SavedState : BaseSavedState, Parcelable {
@@ -276,5 +271,14 @@ class MarkdownCodeView private constructor(
             override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
             override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
+    }
+
+
+    override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>) {
+        dispatchFreezeSelfOnly(container)
+    }
+
+    override fun dispatchRestoreInstanceState(container: SparseArray<Parcelable>) {
+        dispatchThawSelfOnly(container)
     }
 }

@@ -8,21 +8,27 @@ import kotlin.reflect.KProperty
   автоматически запускаемую при вызове setter и инициализации (если needInit==true)
   Кроме того для делегата можно добавить любое число дополнительных listeners (fun addListener(listener: () -> Unit))
 */
-class RenderProp<T>(
+class RenderProp<T : Any>(
     var value: T,
-    needInit: Boolean = true,
+    private val needInit: Boolean = true,
     private val onChange: ((T) -> Unit)? = null
 ) : ReadWriteProperty<Binding, T> {
 
     private val listeners: MutableList<() -> Unit> = mutableListOf()
-
-    init {
+    fun bind() {
         if (needInit) onChange?.invoke(value)
     }
 
-    override fun getValue(thisRef: Binding, property: KProperty<*>): T {
-        return value
+    operator fun provideDelegate(
+        thisRef: Binding,
+        prop: KProperty<*>
+    ): ReadWriteProperty<Binding, T> {
+        val delegate = RenderProp(value, needInit, onChange)
+        registerDelegate(thisRef, prop.name, delegate)
+        return delegate
     }
+
+    override fun getValue(thisRef: Binding, property: KProperty<*>): T = value
 
     override fun setValue(thisRef: Binding, property: KProperty<*>, value: T) {
         if (value == this.value) return
@@ -34,27 +40,15 @@ class RenderProp<T>(
     fun addListener(listener: () -> Unit) {
         listeners.add(listener)
     }
-}
 
-/* Для поля класса thisRef: Binding  создается RenderProp (свойства)
-   и кладет ссылку на него в Map (thisRef.delegates[name] = delegate),
-   для того, чтобы впоследствии всем RenderProp полям данного map добавить общий обработчик
- */
-class ObserveProp<T : Any>(
-    private var value: T,
-    private val onChange: ((T) -> Unit)? = null
-) {
+    /*thisRef: Binding - объект, поле которого представляет данный делегат
+    name: String  - название свойства которое мы делегируем
+    delegate: RenderProp<T> - сам делегат
 
-    operator fun provideDelegate(
-        thisRef: Binding,
-        property: KProperty<*>
-    ): ReadWriteProperty<Binding, T> {
-        val delegate = RenderProp(value, true, onChange)
-        registerDelegate(thisRef, property.name, delegate)
-        return delegate
-    }
-
+    Кладем делегат в общий map класса Binding,
+    чтобы повесить на все поля (делегаты)общий listener*/
     private fun registerDelegate(thisRef: Binding, name: String, delegate: RenderProp<T>) {
         thisRef.delegates[name] = delegate
     }
+
 }
