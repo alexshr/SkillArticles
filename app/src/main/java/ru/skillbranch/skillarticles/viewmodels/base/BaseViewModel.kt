@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
+import ru.skillbranch.skillarticles.extensions.logd
 
 abstract class BaseViewModel<T : IViewModelState>(
     private val handleState: SavedStateHandle,
@@ -99,8 +100,12 @@ abstract class BaseViewModel<T : IViewModelState>(
         onChanged: (newValue: S, currentState: T) -> T?
     ) {
         state.addSource(source) {
+            logd("old state.value: ${state.value}")
             state.value = onChanged(it, currentState) ?: return@addSource
+            logd("new state.value: ${state.value}")
         }
+        logd("addSource: $source")
+
     }
 
     fun saveState() {

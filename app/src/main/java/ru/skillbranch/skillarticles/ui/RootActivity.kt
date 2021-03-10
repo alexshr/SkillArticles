@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.extensions.selectDestination
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
 import ru.skillbranch.skillarticles.viewmodels.RootViewModel
@@ -39,11 +40,13 @@ class RootActivity : BaseActivity<RootViewModel>() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             nav_view.selectDestination(destination)//выделяем позицию на Bottom Toolbar
 
-            /*если нас послали авторизоваться, а мы уже авторизованы, то либо просто возвращаемся откуда пришли,
-              или если был destination (у нас профиль), то сразу идем туда
-              данная ветка не включается, т.к. эта логика  реализована в других местах
+            /*если нас отправили на авторизацию, а мы уже авторизированны,
+            то возвращаемся по backstack,
+            а если на логин попали из-за того, что другая страница, потребовала авторизацию,
+            то идем на ту страницу
             */
             if (viewModel.currentState.isAuth && destination.id == R.id.nav_auth) {
+                logd("avoid auth for authorized")
                 controller.popBackStack()
                 val privateDestination = arguments?.get("private_destination") as Int?
                 privateDestination?.let { controller.navigate(it) }
@@ -82,10 +85,8 @@ class RootActivity : BaseActivity<RootViewModel>() {
 
         snackbar.show()
     }
-/*
-    override fun subscribeOnState(state: IViewModelState) {
-        
-    }*/
+
+
 
 
 }

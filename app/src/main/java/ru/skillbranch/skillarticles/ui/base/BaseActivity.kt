@@ -36,16 +36,13 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
     val toolbarBuilder = ToolbarBuilder()
     val bottombarBuilder = BottombarBuilder()
 
-    //set listeners, tuning views
-    //abstract fun subscribeOnState(state: IViewModelState)
-
     abstract fun renderNotification(notify: Notify)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout)
         setSupportActionBar(toolbar)
-        //viewModel.observeState(this) { subscribeOnState(it) }
+        viewModel.observeState(this) { subscribeOnState(it) }
         viewModel.observeNotifications(this) { renderNotification(it) }
         viewModel.observeNavigation(this) { execNavigationCommand(it) }
 
@@ -65,6 +62,11 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
     override fun onSupportNavigateUp(): Boolean {
         //возвращаемся по графу если можно
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    //подписка viewModel на MediatorLiveData!!
+    fun subscribeOnState(state: IViewModelState) {
+        viewModel.observeState(this){}
     }
 
     //обработка любого события навигации

@@ -58,8 +58,12 @@ fun Context.hideKeyboard(view: View) {
 inline val <reified T> T.TAG: String
     get() = T::class.java.simpleName + " " + Thread.currentThread().stackTrace[2].methodName//+" "+Thread.currentThread().stackTrace[2].lineNumber
 
-inline fun <reified T> T.logv(message: String) =
-    if (!isTest) Log.v(TAG, message) else println("$TAG $message")
+inline fun <reified T> T.specTag(tagPref: String?)=if(tagPref!=null) "$tagPref $TAG" else TAG
+
+inline fun <reified T> T.logv(message: String, tagPref:String?=null): Any {
+    return if (!isTest) Log.v(specTag(tagPref), message) else println("$TAG $message")
+}
+
 
 inline fun <reified T> T.logi(message: String) =
     if (!isTest) Log.i(TAG, message) else println("$TAG $message")
@@ -67,8 +71,8 @@ inline fun <reified T> T.logi(message: String) =
 inline fun <reified T> T.logw(message: String) =
     if (!isTest) Log.w(TAG, message) else println("$TAG $message")
 
-inline fun <reified T> T.logd(message: String) =
-    if (!isTest) Log.d(TAG, message) else println("$TAG $message")
+inline fun <reified T> T.logd(message: String=" ", tagPref:String?=null) =
+    if (!isTest) Log.d(specTag(tagPref), message) else println("$TAG $message")
 
 inline fun <reified T> T.loge(message: String) =
     if (!isTest) Log.e(TAG, message) else println("$TAG $message")
@@ -78,8 +82,6 @@ inline fun <reified T> T.loge(message: String, err: Throwable) =
         println("$TAG $message")
         err.printStackTrace()
     }
-
-inline fun <reified T> T.logd() = logd(" ")
 
 object LogMode {
     var isTest = false
