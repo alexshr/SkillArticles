@@ -368,11 +368,11 @@ private fun Element.clearContent(): String {
     }.toString()
 }
 
-fun List<MarkdownElement>.clearContent() : String{
+fun List<MarkdownElement>.clearContent(): String {
     return StringBuilder().apply {
         this@clearContent.forEach {
-            when(it){
-                is MarkdownElement.Text -> it.elements.forEach { el -> append(el.clearContent())}
+            when (it) {
+                is MarkdownElement.Text -> it.elements.forEach { el -> append(el.clearContent()) }
                 is MarkdownElement.Image -> append(it.image.clearContent())
                 is MarkdownElement.Scroll -> append(it.blockCode.clearContent())
             }

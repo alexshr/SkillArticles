@@ -25,7 +25,6 @@ import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
-//import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatActivity() {
@@ -36,6 +35,9 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
     val toolbarBuilder = ToolbarBuilder()
     val bottombarBuilder = BottombarBuilder()
 
+    //set listeners, tuning views
+    abstract fun subscribeOnState(state: IViewModelState)
+
     abstract fun renderNotification(notify: Notify)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +46,7 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
         setSupportActionBar(toolbar)
         viewModel.observeState(this) { subscribeOnState(it) }
         viewModel.observeNotifications(this) { renderNotification(it) }
-        viewModel.observeNavigation(this) { execNavigationCommand(it) }
+        viewModel.observeNavigation(this) { subscribeOnNavigation(it) }
 
         navController = findNavController(R.id.nav_host_fragment)
     }
@@ -64,13 +66,7 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
-    //подписка viewModel на MediatorLiveData!!
-    fun subscribeOnState(state: IViewModelState) {
-        viewModel.observeState(this){}
-    }
-
-    //обработка любого события навигации
-    private fun execNavigationCommand(command: NavigationCommand) {
+    private fun subscribeOnNavigation(command: NavigationCommand) {
         when (command) {
             is NavigationCommand.To -> {
                 logd()

@@ -189,12 +189,12 @@ class MarkdownContentView @JvmOverloads constructor(
 
     public override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
-        if(state is SavedState) layoutManager = state.layout
+        if (state is SavedState) layoutManager = state.layout
     }
 
     override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
         // save children manually without text
-        children.filter { it !is MarkdownTextView}
+        children.filter { it !is MarkdownTextView }
             .forEach { it.saveHierarchyState(layoutManager.container) }
         // save only markdownContentView
         dispatchFreezeSelfOnly(container)

@@ -9,6 +9,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.annotation.AttrRes
 import ru.skillbranch.skillarticles.extensions.LogMode.isTest
 
@@ -49,9 +50,14 @@ fun Context.attrValue(@AttrRes attr: Int, typedValue: TypedValue = TypedValue())
     return typedValue.data
 }
 
-fun Context.hideKeyboard(view: View) {
+fun Context.hideKeyboard(view: View){
     val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+fun Context.showKeyboard(view: EditText){
+    val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
 }
 
 //alexshr мое логгирование
