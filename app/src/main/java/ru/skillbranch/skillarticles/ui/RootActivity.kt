@@ -11,13 +11,16 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.extensions.selectDestination
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
+import ru.skillbranch.skillarticles.viewmodels.RootState
 import ru.skillbranch.skillarticles.viewmodels.RootViewModel
+import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 class RootActivity : BaseActivity<RootViewModel>() {
     override val layout: Int = R.layout.activity_root
     public override val viewModel: RootViewModel by viewModels()
+    private var isAuth = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +48,7 @@ class RootActivity : BaseActivity<RootViewModel>() {
             а если на логин попали из-за того, что другая страница, потребовала авторизацию,
             то идем на ту страницу
             */
-            if (viewModel.currentState.isAuth && destination.id == R.id.nav_auth) {
+            if (isAuth && destination.id == R.id.nav_auth) {
                 logd("avoid auth for authorized")
                 controller.popBackStack()
                 val privateDestination = arguments?.get("private_destination") as Int?
@@ -59,8 +62,7 @@ class RootActivity : BaseActivity<RootViewModel>() {
     override fun renderNotification(notify: Notify) {
         val snackbar = Snackbar.make(container, notify.message, Snackbar.LENGTH_LONG)
 
-        if(bottombar != null) snackbar.anchorView = bottombar
-        else snackbar.anchorView = nav_view
+        snackbar.anchorView = bottombar ?: nav_view
 
         when (notify) {
             is Notify.TextMessage -> {
@@ -86,7 +88,9 @@ class RootActivity : BaseActivity<RootViewModel>() {
         snackbar.show()
     }
 
-
+    override fun subscribeOnState(state: IViewModelState) {
+        isAuth = (state as RootState).isAuth
+    }
 
 
 }

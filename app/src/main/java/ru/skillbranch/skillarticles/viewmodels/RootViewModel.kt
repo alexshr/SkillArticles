@@ -13,7 +13,6 @@ class RootViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
     private val privateRoutes = listOf(R.id.nav_profile)
 
     init {
-
         subscribeOnDataSource(repository.isAuth()) { isAuth, state ->
             logd("state.copy(isAuth = $isAuth)", "myTest")
             state.copy(isAuth = isAuth)
@@ -33,15 +32,12 @@ class RootViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
                     logd("StartLogin")
                     super.navigate(NavigationCommand.StartLogin(command.destination))
                 } else {
-                    logd()
                     super.navigate(command)
                 }
             }
             else -> super.navigate(command)
         }
     }
-
-
 }
 
 data class RootState(

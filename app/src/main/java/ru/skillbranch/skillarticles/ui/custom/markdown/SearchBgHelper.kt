@@ -21,11 +21,11 @@ import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 class SearchBgHelper(
     context: Context,
     private val focusListener: ((Int, Int) -> Unit)? = null,
-    mockDrawable : Drawable? = null
+    mockDrawable: Drawable? = null
 ) {
 
     @VisibleForTesting
-    constructor(context: Context, focusListener: ((Int, Int) -> Unit)): this(
+    constructor(context: Context, focusListener: ((Int, Int) -> Unit)) : this(
         context,
         focusListener,
         null
@@ -96,7 +96,12 @@ class SearchBgHelper(
     private lateinit var render: SearchBgRender
 
     private val singleLineRender = SingleLineRender(padding, mockDrawable ?: drawable)
-    private val multiLineRender = MultiLineRender(padding, mockDrawable ?: drawableLeft, mockDrawable ?: drawableMiddle, mockDrawable ?: drawableRight)
+    private val multiLineRender = MultiLineRender(
+        padding,
+        mockDrawable ?: drawableLeft,
+        mockDrawable ?: drawableMiddle,
+        mockDrawable ?: drawableRight
+    )
     /*private val singleLineRender: SearchBgRender by lazy {
         SingleLineRender(
             padding, drawable
@@ -119,7 +124,7 @@ class SearchBgHelper(
             startLine = layout.getLineForOffset(spanStart)
             endLine = layout.getLineForOffset(spanEnd)
 
-            if(it is SearchFocusSpan){
+            if (it is SearchFocusSpan) {
                 focusListener?.invoke(layout.getLineTop(startLine), layout.getLineBottom(startLine))
             }
 
