@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.ui.bookmarks
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_bookmarks.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.extensions.logi
 import ru.skillbranch.skillarticles.ui.articles.ArticlesAdapter
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
@@ -42,7 +42,7 @@ class BookmarksFragment : BaseFragment<BookmarksViewModel>() {
     }
 
     private val articlesAdapter = ArticlesAdapter({ item ->
-        Log.e("BookmarkFragment", "click on article: ${item.id} ")
+        logi("click on article: ${item.id} ")
         val action = BookmarksFragmentDirections.actionNavBookmarksToPageArticle(
             item.id,
             item.author,

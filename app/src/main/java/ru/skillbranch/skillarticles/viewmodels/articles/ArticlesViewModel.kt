@@ -17,7 +17,8 @@ import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import java.util.concurrent.Executors
 
 
-class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>(handle, ArticlesState()) {
+class ArticlesViewModel(handle: SavedStateHandle) :
+    BaseViewModel<ArticlesState>(handle, ArticlesState()) {
     val repository = ArticlesRepository
     private val listConfig by lazy {
         PagedList.Config.Builder()
@@ -28,40 +29,46 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
             .build()
     }
 
-    private val listData = Transformations.switchMap(state){
+    //трансформация LiveData (ArticleState->PagedList)
+    private val listData = Transformations.switchMap(state) {
         when {
-            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(repository.searchArticles(it.searchQuery))
+            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(
+                repository.searchArticles(
+                    it.searchQuery
+                )
+            )
             else -> buildPagedList(repository.allArticles())
         }
 
     }
 
-
-
     fun observeList(
         owner: LifecycleOwner,
-        onChange : (list: PagedList<ArticleItemData>) -> Unit
-    ){
+        onChange: (list: PagedList<ArticleItemData>) -> Unit
+    ) {
         listData.observe(owner, Observer { onChange(it) })
     }
 
     private fun buildPagedList(
-        dataFactory : ArticleDataFactory
-    ) : LiveData<PagedList<ArticleItemData>>{
+        dataFactory: ArticleDataFactory
+    ): LiveData<PagedList<ArticleItemData>> {
         val builder = LivePagedListBuilder<Int, ArticleItemData>(
             dataFactory, listConfig
         )
 
-        if(dataFactory.strategy is ArticleStrategy.AllArticles)
-            builder.setBoundaryCallback(ArticleBoundaryCallback(
-                ::zeroLoadingHandle,
-                ::itemAtEndHandle
-            ))
+        if (dataFactory.strategy is ArticleStrategy.AllArticles)
+            builder.setBoundaryCallback(
+                ArticleBoundaryCallback(
+                    ::zeroLoadingHandle,
+                    ::itemAtEndHandle
+                )
+            )
         return builder
             .setFetchExecutor(Executors.newSingleThreadExecutor())
             .build()
     }
 
+    //загрузка очередной порции
     private fun itemAtEndHandle(lastLoadArticle: ArticleItemData) {
         logd()
         viewModelScope.launch(Dispatchers.IO) {
@@ -70,24 +77,30 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 size = listConfig.pageSize
             )
 
-            if(items.isNotEmpty()){
+            if (items.isNotEmpty()) {
                 repository.insertArticlesToDb(items)
                 listData.value?.dataSource?.invalidate()
             }
 
-            withContext(Dispatchers.Main){
-                notify(Notify.TextMessage("Load from network articles " +
-                        "from ${items.firstOrNull()?.id} to ${items.lastOrNull()?.id}"))
+            withContext(Dispatchers.Main) {
+                notify(
+                    Notify.TextMessage(
+                        "Load from network articles " +
+                                "from ${items.firstOrNull()?.id} to ${items.lastOrNull()?.id}"
+                    )
+                )
             }
         }
     }
 
+    //начальная загрузка данных
     private fun zeroLoadingHandle() {
         logd()
         notify(Notify.TextMessage("Storage is empty"))
         viewModelScope.launch(Dispatchers.IO) {
-            val items = repository.loadArticlesFromNetwork(start = 0, size = listConfig.initialLoadSizeHint )
-            if(items.isNotEmpty()){
+            val items =
+                repository.loadArticlesFromNetwork(start = 0, size = listConfig.initialLoadSizeHint)
+            if (items.isNotEmpty()) {
                 repository.insertArticlesToDb(items)
                 listData.value?.dataSource?.invalidate()
             }
@@ -117,9 +130,9 @@ data class ArticlesState(
     val isSearch: Boolean = false,
     val searchQuery: String? = null,
     val isLoading: Boolean = true
-): IViewModelState
+) : IViewModelState
 
-
+//обработчик для PagedList
 class ArticleBoundaryCallback(
     private val zeroLoadingHandle: () -> Unit,
     private val itemAtEndHandle: (ArticleItemData) -> Unit

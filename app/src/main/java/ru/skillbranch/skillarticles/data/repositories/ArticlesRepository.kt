@@ -9,12 +9,15 @@ import ru.skillbranch.skillarticles.extensions.logd
 import ru.skillbranch.skillarticles.extensions.loge
 import java.lang.Thread.sleep
 
-
+/*
+Получение DataFactory по конкретной стратегии
+*/
 object ArticlesRepository {
 
     private val local = LocalDataHolder
     private val network = NetworkDataHolder
 
+    //region получение нужных DataFactory (pagging library)
     fun allArticles(): ArticleDataFactory =
         ArticleDataFactory(ArticleStrategy.AllArticles(::findArticlesByRange))
 
@@ -22,14 +25,16 @@ object ArticlesRepository {
         ArticleDataFactory(ArticleStrategy.SearchArticle(::searchArticlesByTitle, searchQuery))
 
     fun allBookmarks(): ArticleDataFactory =
-        ArticleDataFactory(ArticleStrategy.AllBookmarks(::findArticlesBookmark))
+        ArticleDataFactory(ArticleStrategy.BookmarkArticles(::findArticlesBookmark))
 
     fun searchBookmarks(searchQuery: String): ArticleDataFactory =
         ArticleDataFactory(
             ArticleStrategy.SearchBookmarks(::findBookmarkArticlesByTitle, searchQuery)
         )
+    //endregion
 
 
+    //region получение локальных для нужных DataFactory (pagging library)
     private fun findArticlesByRange(start: Int, size: Int) = local.localArticleItems
         .drop(start)
         .take(size)
@@ -56,7 +61,9 @@ object ArticlesRepository {
             .drop(start)
             .take(size)
             .toList()
+    //endregion
 
+    //загрузка данных из сети
     fun loadArticlesFromNetwork(start: Int, size: Int): List<ArticleItemData> =
         network.networkArticleItems
             .drop(start)
@@ -64,7 +71,6 @@ object ArticlesRepository {
             .apply {
                 sleep(500)
             }
-
 
     fun insertArticlesToDb(articles: List<ArticleItemData>) {
         local.localArticleItems.addAll(articles)
@@ -86,6 +92,7 @@ object ArticlesRepository {
 
 }
 
+//получение datasource из ArticlesRepository по нужной стратегии (там указан метод репозитория)
 class ArticleDataFactory(val strategy: ArticleStrategy) :
     DataSource.Factory<Int, ArticleItemData>() {
     override fun create(): DataSource<Int, ArticleItemData> = ArticleDataSource(strategy)
@@ -115,6 +122,7 @@ class ArticleDataSource(val strategy: ArticleStrategy) : PositionalDataSource<Ar
 
 }
 
+//каждая стратегия получает метод получения items
 sealed class ArticleStrategy() {
     abstract fun getItems(start: Int, size: Int): List<ArticleItemData>
 
@@ -135,7 +143,7 @@ sealed class ArticleStrategy() {
 
     }
 
-    class AllBookmarks(
+    class BookmarkArticles(
         private val itemProvider: (Int, Int) -> List<ArticleItemData>
     ) : ArticleStrategy() {
         override fun getItems(start: Int, size: Int): List<ArticleItemData> =

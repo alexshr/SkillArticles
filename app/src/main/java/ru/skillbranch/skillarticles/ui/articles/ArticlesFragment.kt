@@ -41,18 +41,20 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     }
 
 
-    private val articlesAdapter = ArticlesAdapter( { item ->
-        val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
-            item.id,
-            item.author,
-            item.authorAvatar,
-            item.category,
-            item.categoryIcon,
-            item.date,
-            item.poster,
-            item.title
-        )
-        viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))},
+    private val articlesAdapter = ArticlesAdapter(
+        { item ->
+            val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
+                item.id,
+                item.author,
+                item.authorAvatar,
+                item.category,
+                item.categoryIcon,
+                item.date,
+                item.poster,
+                item.title
+            )
+            viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
+        },
         handleToggleBookmark
     )
 
@@ -65,10 +67,10 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         super.onPrepareOptionsMenu(menu)
         val menuItem = menu.findItem(R.id.action_search)
         val searchView = menuItem.actionView as SearchView
-        if(binding.isSearch){
+        if (binding.isSearch) {
             menuItem.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
-            if(binding.isFocusedSearch) searchView.requestFocus()
+            if (binding.isFocusedSearch) searchView.requestFocus()
             else searchView.clearFocus()
         }
 
@@ -109,7 +111,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         }
 
-        viewModel.observeList(viewLifecycleOwner){
+        viewModel.observeList(viewLifecycleOwner) {
             articlesAdapter.submitList(it)
         }
     }
@@ -118,9 +120,9 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
         //данные для ui
         val isFocusedSearch: Boolean = false
-        var searchQuery : String? = null
+        var searchQuery: String? = null
         var isSearch: Boolean = false
-        var isLoading: Boolean by RenderProp(true){
+        var isLoading: Boolean by RenderProp(true) {
             //TODO show shimer on rv_list
         }
 
