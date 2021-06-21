@@ -6,7 +6,7 @@ import ru.skillbranch.skillarticles.data.LocalDataHolder
 import ru.skillbranch.skillarticles.data.NetworkDataHolder
 import ru.skillbranch.skillarticles.data.models.ArticleItemData
 import ru.skillbranch.skillarticles.extensions.logd
-import ru.skillbranch.skillarticles.extensions.loge
+import ru.skillbranch.skillarticles.extensions.logi
 import java.lang.Thread.sleep
 
 /*
@@ -105,17 +105,17 @@ class ArticleDataSource(val strategy: ArticleStrategy) : PositionalDataSource<Ar
         callback: LoadInitialCallback<ArticleItemData>
     ) {
         val result = strategy.getItems(params.requestedStartPosition, params.requestedLoadSize)
-        loge(
-            "loadInitial: start > ${params.requestedStartPosition} " +
-                    "size > ${params.requestedLoadSize} resultSize ? ${result.size}"
+        logi(
+            "loadInitial: start = ${params.requestedStartPosition} " +
+                    "size = ${params.requestedLoadSize} resultSize ? ${result.size}"
         )
         callback.onResult(result, params.requestedStartPosition)
     }
 
     override fun loadRange(params: LoadRangeParams, callback: LoadRangeCallback<ArticleItemData>) {
         val result = strategy.getItems(params.startPosition, params.loadSize)
-        loge(
-            "loadRange: start > ${params.startPosition} size > ${params.loadSize}, resultSize ? ${result.size}"
+        logi(
+            "loadRange: start = ${params.startPosition} size = ${params.loadSize}, resultSize ? ${result.size}"
         )
         callback.onResult(result)
     }
